@@ -70,3 +70,80 @@ This p-value means that IF our samples are drawn from populations with the same 
 
 No significant difference in medians (Mann-Whitney) U; U = `r mwu$statistic`, p = `r round(mwu$p.value, 2)`)
 
+Example tect for reporting: "The medians of group A (M = 22.4 g) and group B (M = 31.2 g) did not differ significantly (Mann Whitney U, ....)."
+
+### Simple linear regression
+
+Two *continuous quantitative* variables that you are trying to understand the relationship between, and you think that a linear relationship makes sense.
+
+Use the `penguins` data from {palmerpenguins}, exploring flipper length (x) versus body mass(y).
+
+```{r}
+# Use View(penguins) to look at it
+# Make an explroatory scatterplot of penguin flipper length (x-axis) versus body mass( y-axis)
+
+ggplot(data = penguins, 
+       aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point() +
+  geom_smooth(method = "lm")
+
+# If you present something with linear modeling you are saying that you understand the math behind the creation of this trend line, you better understand what that R^2 value means, you better be able to explain it
+
+```
+
+### Find the Model Estimates (coefficients)
+
+Use the `lm()` function for linear model.
+
+when I do body_mass_g ~ <<<< that is a tilde, not a minus sign
+it says run body mass g as a function of flipper, body mass g is the dependent variable
+
+```{r}
+penguin_lm <- lm(body_mass_g ~ flipper_length_mm, data = penguins)
+```
+
+ So this says, it's y=mx+b, body_mass_g (y) = 49.69(g/mm)(flipper_length_mm) - 5780.8 (g)
+ 49.69/1 (g/mm), the slope means on average for a 1 mm increase in flipper length, there is a 49.69 g increase in body mass on average
+ 
+the y-intercept is the mass of penguin with no flippers, a flipper length of 0, based on our model that is the expected average mass of penguins that have a flipper length of 0mm
+ - this is important in giving us our correct starting point
+ - a negative weight doesnt exist, it's not logical in real life
+ - the y-intecept on it's own is sometimes not meaningful to interpret
+ 
+For each coeeficient value it does a statistical hypothesis where the value of those coefficients is equal to 0
+ - we have significantly non-0 coefficients 
+ 
+ Model coefficients: `r penguin_lm$coefficients`
+ Flipper length coefficient :`r penguin_lm$coefficients[2]`
+ 
+ [] square brackets are called indexing, so ^ that calls the second coefficient only, it signifies what you want to call and show up in your knitted doc
+ 
+### Use `broom::tidy()` to get a tidy output from lm()
+
+```{r}
+penguin_lm_tidy <- tidy(penguin_lm)
+
+penguin_lm_tidy # this gets us a lot of the way towards a finalized table of regression outcomes but it's not finalized yet, there are other ways to change it
+```
+
+### Use `broom::glance()` to get output of model fit & statistical significance
+
+```{r}
+penguin_lm_glance <- glance(penguin_lm)
+
+penguin_lm_glance
+```
+
+### Use equatiomatic::extract_eq() to return model in LaTeX (a language used to write mathematical equations)
+the :: means in this package (equatiomatic) use extract_eq() 
+
+```{r}
+extract_eq(model = penguin_lm, use_coefs = TRUE)
+```
+
+### Use plot() function to automatically produce diagnostic pools
+
+```{r}
+plot(penguin_lm)
+```
+
