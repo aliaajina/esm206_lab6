@@ -1,5 +1,5 @@
 ---
-title: "esm206_lab6"
+title: "ESM 206 Lab 6"
 author: "Alia Ajina"
 date: "11/2/2021"
 output: html_document
@@ -7,24 +7,66 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(palmerpenguins)
+library(broom)
+library(equatiomatic)
 ```
 
-## R Markdown
+## Rank Based Test Example
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Mann-Whitney U (non-parametric alternative to an unpaired 2-sample t-test).
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+H0: Equal ranks (or medians)
+HA: Ranks are nor equal (or, medians are not equal)
 
-```{r cars}
-summary(cars)
+### Create mock samples
+
+`set.seed()` to create 'pseudorandom, but reproducible samples'
+
+```{r}
+set.seed(1414) #if we use set.seed it will set the starting number and if it is all the same every R code will get the same number sequence
+gp_1 <- sample.int(20, size = 15, replace = TRUE) # numbers from 1 to 20, 15 different numbers
+
+set.seed(1424)
+gp_2 <- sample.int(30, size = 15, replace = TRUE) # Replace makes it a random sample
 ```
 
-## Including Plots
+Take a quick look at the distributions using `hist()`
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+hist(gp_1)
+hist(gp_2)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Try a t-test so we can compare the results:
+
+```{r}
+ttest <- t.test(gp_1, gp_2)
+
+# If these data were paired, I can just add the ardument 'paired = "TRUE"' within the t.test() function.
+```
+
+If they come from populations with the same mean, then there's a 19.8 percent chance of finding random sample means that are at least as different as the ones I found from my samples.
+
+This p-value means that IF our samples are drawn from populations with the same mean (ie., if the null hypothesis is true), there is a `r round(ttest$p.value,2)` probability of finding sample means *at least as different* as mine by random chance. 
+(command enter allows you to run the value you're calculating IE .2)
+
+[A more comprehensive explanation of difference between groups... actually means, data spread, effect size]... there is no significant difference (t(df) t-statistic value, p =)
+
+You should say "there is no significant difference" never say "we fail to reject the null hypothesis) she doesn't like this language
+
+BUT make sure you don't say accept-- say we fail to reject or we retain the null hypothesis, she thinks this is a stupid conversation
+
+### Mann Whitney U rank based test
+
+We use the `wilcox.test()` function to perform a two-sample rank-based test.
+
+```{r}
+mwu <- wilcox.test(gp_1, gp_2)
+```
+
+This p-value means that IF our samples are drawn from populations with the same median (ie., if the null hypothesis is true), then there is a 28% chance of finding samples medians *at least as different* as ours by random chance. 
+
+No significant difference in medians (Mann-Whitney) U; U = `r mwu$statistic`, p = `r round(mwu$p.value, 2)`)
+
